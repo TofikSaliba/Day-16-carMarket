@@ -968,14 +968,14 @@ carMarket.sortAndFilterByYearOfProduction = function (
   return modelsArray;
 };
 
-console.log(
-  carMarket.sortAndFilterByYearOfProduction(
-    carMarket.sellers[0].cars,
-    2005,
-    2015,
-    true
-  )
-);
+// console.log(
+//   carMarket.sortAndFilterByYearOfProduction(
+//     carMarket.sellers[0].cars,
+//     2005,
+//     2015,
+//     true
+//   )
+// );
 
 //* 3) sortAndFilterByPrice
 //?   filter and Sort in a Ascending or Descending order all vehicles for sale by price of the cars.
@@ -985,6 +985,37 @@ console.log(
 //?   @param {boolean} - isAscendingOrder - true for ascending order, false for descending order
 //?   @return {object[]} - arrayOfModels - array of sorted cars
 
+carMarket.sortAndFilterByPrice = function (
+  carArray,
+  fromPrice,
+  toPrice,
+  isAscendingOrder
+) {
+  const modelsArray = [];
+  carArray.forEach((car) => {
+    car.models.forEach((model) => {
+      if (fromPrice <= model.price && model.price <= toPrice) {
+        modelsArray.push(model);
+      }
+    });
+  });
+  if (isAscendingOrder) {
+    modelsArray.sort((a, b) => a.price - b.price);
+  } else {
+    modelsArray.sort((a, b) => b.price - a.price);
+  }
+  return modelsArray;
+};
+
+// console.log(
+//   carMarket.sortAndFilterByPrice(
+//     carMarket.sellers[0].cars,
+//     50000,
+//     200000,
+//     false
+//   )
+// );
+
 //* 4 ) searchCar
 //?   @param {object[]} - arrOfCars - array of cars
 //?   @param {number} - fromYear - Will display vehicles starting this year
@@ -992,6 +1023,47 @@ console.log(
 //?   @param {number} - fromPrice - Will display vehicles starting at this price
 //?   @param {number} - fromPrice - Will display vehicles up to this price
 //?   optional @param {string} - brand - Look only for cars of this brand
+
+carMarket.searchCar = function (
+  carArray,
+  fromYear,
+  toYear,
+  fromPrice,
+  toPrice,
+  brand
+) {
+  const modelsArray = [];
+  carArray.forEach((car) => {
+    car.models.forEach((model) => {
+      if (
+        fromYear <= model.year &&
+        model.year <= toYear &&
+        fromPrice <= model.price &&
+        model.price <= toPrice
+      ) {
+        if (brand) {
+          if (brand === car.brand) {
+            modelsArray.push(model);
+          }
+        } else {
+          modelsArray.push(model);
+        }
+      }
+    });
+  });
+  return modelsArray;
+};
+
+console.log(
+  carMarket.searchCar(
+    carMarket.sellers[0].cars,
+    2005,
+    2015,
+    5000,
+    50000,
+    "toyota"
+  )
+);
 
 //* 5 ) sellCar
 //?   Sell ​​a car to a specific customer
