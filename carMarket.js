@@ -868,7 +868,9 @@ carMarket.decrementOrIncrementCreditOfAgency = function (
 
 carMarket.setAmountOfCarsToBuyToAllAgency = function (carMarket) {
   carMarket.sellers.forEach((agency) => {
-    agency.amountOfCars = agency.cars.length;
+    let counter = 0;
+    agency.cars.forEach((car) => (counter += car.models.length));
+    agency.amountOfCars = counter;
   });
   return carMarket.sellers;
 };
@@ -1054,16 +1056,16 @@ carMarket.searchCar = function (
   return modelsArray;
 };
 
-console.log(
-  carMarket.searchCar(
-    carMarket.sellers[0].cars,
-    2005,
-    2015,
-    5000,
-    50000,
-    "toyota"
-  )
-);
+// console.log(
+//   carMarket.searchCar(
+//     carMarket.sellers[0].cars,
+//     2005,
+//     2015,
+//     5000,
+//     50000,
+//     "toyota"
+//   )
+// );
 
 //* 5 ) sellCar
 //?   Sell ​​a car to a specific customer
@@ -1071,11 +1073,11 @@ console.log(
 //?   @param {string} - customerId
 //?   @param {string} - carModel
 //?   @return {object} - The object of the car purchased by the customer or an explanation message
-// *     - 5a. Subtract the vehicle amount + 17% (tax) from the customer's cash.
-// *     - 5b. Add the vehicle value to the car agency cash.
-// *     - 5c. Change the car owner's id to the customer's id.
-// *     - 5d. Remove the car from the array of the agency's car models.
-// *     - 5e. Add the car to the client cars array.
+// *  X   - 5a. Subtract the vehicle amount + 17% (tax) from the customer's cash.
+// *  X   - 5b. Add the vehicle value to the car agency cash.
+// *  X   - 5c. Change the car owner's id to the customer's id.
+// *  X   - 5d. Remove the car from the array of the agency's car models.
+// *  X   - 5e. Add the car to the client cars array.
 // *
 // *     Taxes Authority:
 // *     - 5f. Pay 17 percent of the vehicle value to the tax authority. (add the amount to totalTaxesPaid)
@@ -1085,3 +1087,45 @@ console.log(
 // !     - Check that the customer has enough money to purchase the vehicle, if not return 'The customer does not have enough money'
 
 //!      - Try to divide the tasks into several functions and try to maintain a readable language.
+
+carMarket.sellCar = function (marketObj, agencyId, customerId, carModel) {
+  const arr = [];
+  //? here i retrieve agency, customer and car objects to work with
+  const agencyObj = marketObj.sellers.find((agency) => {
+    return agency.agencyId === agencyId;
+  });
+  const customerObj = marketObj.customers.find((customer) => {
+    return customer.id === customerId;
+  });
+  agencyObj.cars.forEach((car) => {
+    const carOb = car.models.find((model) => {
+      return model.name === carModel;
+    });
+    if (carOb) {
+      arr.push(carOb);
+    }
+  });
+  const carObj = arr[0];
+  if (!carObj) {
+    return "The vehicle does not exist at the agency";
+  }
+  //? here i check if the customer has enough money
+  if (carObj.price * 1.17 > customerObj.cash) {
+    return `Sorry! not enough money to purchase the car. Customer has ${
+      customerObj.cash
+    }, need at least: ${carObj.price * 1.17}`;
+  } else {
+    marketObj.deleteCarFromAgency(marketObj, agencyId, carObj.carNumber);
+    customerObj.cash -= carObj.price * 1.17;
+    agencyObj.cash += carObj.price;
+    marketObj.taxesAuthority.totalTaxesPaid += carObj.price * 0.17;
+    marketObj.taxesAuthority.sumOfAllTransactions += carObj.price * 1.17;
+    marketObj.taxesAuthority.numberOfTransactions += 1;
+  }
+
+  customerObj.cars.push(carObj);
+  customerObj.cars[customerObj.cars.length - 1].ownerId = customerId;
+  return customerObj.cars[customerObj.cars.length - 1];
+};
+
+console.log(carMarket.sellCar(carMarket, "Plyq5M5AZ", "FQvNsEwLZ", "X6"));
